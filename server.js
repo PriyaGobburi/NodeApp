@@ -49,9 +49,9 @@ var refreshAccessToken = function(){
         var options2 = {
             "url": "https://byteacademy.fluidreview.com/api/v2/o/token/?" + qs.stringify({
                   "grant_type": "refresh_token",
-                  "client_id": value.client_id,
-                  "client_secret": value.client_secret,
-                  "refresh_token": value.refresh_token
+                  "client_id": value.fluid.client_id,
+                  "client_secret": value.fluid.client_secret,
+                  "refresh_token": value.fluid.refresh_token
             })
           
         };
@@ -72,11 +72,11 @@ var refreshAccessToken = function(){
         console.log("then1:", arguments);
         return __config.then(function(value){
             console.log("nested then1:", arguments);
-            value.access_token = tokens.access_token;
-            value.refresh_token = tokens.refresh_token;
+            value.fluid.access_token = tokens.access_token;
+            value.fluid.refresh_token = tokens.refresh_token;
             return new Promise(function(resolve, reject){
                 console.log("after token request:", arguments);
-                if (value.access_token && value.refresh_token){
+                if (value.fluid.access_token && value.fluid.refresh_token){
                     resolve(value);
                 } else {
                     reject(value);
@@ -101,24 +101,27 @@ var refreshAccessToken = function(){
 };
 
 var addMemberToMailChimp = function(args){
-    var 
-      options = {
-        "url": "https://us9.api.mailchimp.com/3.0/lists/ae34e192fd/members",
-        'json': {
-          "email_address": args.email,
-          "merge_fields": {
-              "FNAME": args.first_name,
-              "LNAME": args.last_name
-          },
-          "status": "subscribed"
-        },
-        'auth': {
-          'user': 'bytebootcamp@gmail.com',
-          'pass': '8b79104c593aa55a208944c7dab938e8-us9',
-          'sendImmediately': true
-        }
-      },
-      mailChimpReq = request.post(options, args.callback);
+    config.then(function(value){
+        var 
+          options = {
+            "url": "https://us9.api.mailchimp.com/3.0/lists/ae34e192fd/members",
+            'json': {
+              "email_address": args.email,
+              "merge_fields": {
+                  "FNAME": args.first_name,
+                  "LNAME": args.last_name
+              },
+              "status": "subscribed"
+            },
+            'auth': {
+              'user': value.mailchimp.user,
+              'pass': value.mailchimp.pass,
+              'sendImmediately': true
+            }
+          };
+         var mailChimpReq = request.post(options, args.callback);
+
+    });
 };
 
 var getNewUser = function(user_id, config, callback){
